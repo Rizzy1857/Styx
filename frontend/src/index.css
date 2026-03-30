@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-dark-navy text-ice-blue;
+}
+
+.btn-primary {
+  @apply px-4 py-2 bg-light-navy hover:bg-navy rounded text-ice-blue font-semibold transition;
+}
+
+.status-active {
+  @apply px-3 py-1 bg-green-900 text-green-200 rounded text-sm font-medium;
+}
+
+.status-deprecated {
+  @apply px-3 py-1 bg-yellow-900 text-yellow-200 rounded text-sm font-medium;
+}
+
+.status-zombie {
+  @apply px-3 py-1 bg-red-900 text-red-200 rounded text-sm font-medium;
+}
+
+.status-shadow {
+  @apply px-3 py-1 bg-purple-900 text-purple-200 rounded text-sm font-medium;
+}
