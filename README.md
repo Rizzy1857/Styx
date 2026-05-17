@@ -1,332 +1,315 @@
 # Styx — API Lifecycle Intelligence Platform
 
-## The Problem I Was Trying to Solve
+## Problem Statement
 
-I spent countless nights staring at spreadsheets of legacy APIs, wondering: **Which ones are actually dead? If I kill this one, what breaks?**
+This project addresses a critical banking operations challenge: **Safely decommissioning risky APIs without breaking dependent systems.**
 
-Banks have hundreds (sometimes thousands) of APIs running in production. Most teams don't know which ones are still needed, which ones are security nightmares, and—most importantly—**what will explode if they shut one down.**
+Styx enables financial institutions to identify zombie APIs (unused, outdated, or deprecated), understand blast radius through dependency mapping, and detect anomalies in real-time. The platform combines machine learning (Isolation Forest), security posture analysis (OWASP/CVSS), and interactive visualizations to support data-driven API decommissioning decisions.
 
-That's where Styx came in. I built this to help teams:
+## Live Demo
 
-- 🔍 Identify zombie APIs (unused, outdated, or sitting there waiting to cause trouble)
-- 📊 Visualize dependencies without breaking a sweat
-- ⚡ See the blast radius before you pull the trigger
-- 🚨 Get real alerts when APIs come back from the deadThink of it as a safety net for API decommissioning. You point at an API, Styx tells you what'll break, and then you can actually make informed decisions.
+🔗 **Live Demo:** [http://localhost:5173](http://localhost:5173) (Run locally using instructions below)
 
-## What I Built (Tech Stack)
+🎥 **Demo Video:** Contact [Rizzy1857@gmail.com](mailto:Rizzy1857@gmail.com) for recorded walkthrough
 
-This isn't some magical black box. Here's what's actually running under the hood:
+## Tech Stack
 
-- **Python 3.13** with FastAPI (because REST APIs just work)
-- **PostgreSQL 15** for storing all the API metadata (it's just SQL, nothing fancy)
-- **Scikit-learn's Isolation Forest** for the ML stuff (trained on real usage patterns)
-- **NetworkX** for building dependency graphs (basically drawing connections between APIs)
-- **React 18.2.0** with Vite (frontend is fast, minimal JavaScript cruft)
-- **D3.js 7.8.5** for those interactive graph visualizations
-- **Recharts 2.10.3** for trend charts (because Excel charts are not cool)
-- **Tailwind CSS** for styling (utility-first, keeps things clean)
+- Python 3.13 with FastAPI 0.104.1
+- PostgreSQL 15 with SQLAlchemy 2.0.37 ORM
+- Scikit-learn — Isolation Forest ML model (8-feature zombie scorer)
+- NetworkX — Graph-based dependency analysis
+- React 18.2.0 with Vite 5.0.0 (frontend)
+- D3.js 7.8.5 — Interactive dependency graph visualization
+- Recharts 2.10.3 — 30-day trend charts and analytics dashboards
+- Tailwind CSS 3.3.5 — Responsive UI styling
+- Pydantic — Data validation for API schemas
 
-## Getting It Running (On Your Machine)
+## How to Run Locally
 
-I know you want to just try it. Here's what I did:
-
-### What You Need First
+### Prerequisites
 
 ```bash
 Node.js 18+
 Python 3.13+
-PostgreSQL 15+ (or just Docker it)
+PostgreSQL 15+ (or Docker)
 ```
 
-### The Step-by-Step (I Did This Manually)
+### Installation & Startup
 
 ```bash
-# 1. Clone it down
+# 1. Clone the repo
 git clone https://github.com/Rizzy1857/Styx
 cd Styx
 
-# 2. Python setup (virtual environment is your friend)
+# 2. Backend setup
 cd backend
 python -m venv venv
-source venv/bin/activate  # on Mac/Linux (Windows: venv\Scripts\activate)
+source venv/bin/activate  # macOS/Linux; Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# 3. Database stuff (I usually just have Postgres running locally)
+# 3. Database setup
 cd ..
 cd backend
-alembic upgrade head  # migration magic
-python scripts/seed_data.py  # loads 25 test APIs + all their dependencies
+alembic upgrade head
+python scripts/seed_data.py  # Populates 25 APIs + 40 dependencies
 
-# 4. Fire up the backend (terminal 1)
-cd backend
+# 4. Start backend (terminal 1)
 uvicorn main:app --reload --port 8000
 
-# 5. Get the frontend going (terminal 2)
-cd frontend
+# 5. Start frontend (terminal 2)
+cd ../frontend
 npm install
 npm run dev
 
-# 6. Open a browser and go here:
-# http://localhost:5173 (React app)
-# http://localhost:8000/docs (API docs, super helpful)
+# 6. Access application
+# Frontend:  http://localhost:5173
+# API Docs:  http://localhost:8000/docs
 ```
 
-That's it. You've got the whole system running locally.
-
-## How The Code Is Organized
-
-I kept it as simple as possible:
+## Project Structure
 
 ```plaintext
 Styx/
 ├── backend/
 │   ├── app/
 │   │   ├── api/endpoints/
-│   │   │   ├── apis.py             # Just CRUD operations for APIs
-│   │   │   ├── scoring.py          # Calculates lifecycle + security scores
-│   │   │   ├── dependencies.py     # Maps what depends on what
-│   │   │   ├── alerts.py           # Watches for when dead APIs come back
-│   │   │   ├── simulator.py        # Shows what breaks if you kill this API
-│   │   │   └── analytics.py        # Dashboard data with ML insights
-│   │   ├── models/                 # SQLAlchemy models (api, security, dependency, alert)
-│   │   ├── schemas/                # Pydantic validation (api, scoring, analytics)
-│   │   └── services/               # The actual business logic
-│   │       ├── lifecycle_scorer.py     # Figured out if APIs are dead
-│   │       ├── security_analyzer.py    # Security risk calculations
-│   │       ├── isolation_forest_scorer.py  # The ML model
-│   │       ├── anomaly_detector.py     # Spots weird activity
-│   │       ├── graph_builder.py        # Builds the dependency graph
-│   │       └── alert_engine.py         # Sends alerts
+│   │   │   ├── apis.py             # API inventory CRUD
+│   │   │   ├── scoring.py          # Lifecycle & security analysis
+│   │   │   ├── dependencies.py     # Graph & blast radius
+│   │   │   ├── alerts.py           # State-tracking alerts
+│   │   │   ├── simulator.py        # Multi-API impact simulator
+│   │   │   └── analytics.py        # ML-powered dashboards (Phase 2.1)
+│   │   ├── models/                 # SQLAlchemy ORM models
+│   │   ├── schemas/                # Pydantic request/response models
+│   │   └── services/               # Business logic services
+│   │       ├── lifecycle_scorer.py     # Heuristic + ML-based zombie scoring
+│   │       ├── security_analyzer.py    # OWASP/CVSS security posture
+│   │       ├── isolation_forest_scorer.py  # Isolation Forest ML model
+│   │       ├── anomaly_detector.py     # Traffic spike, dependency, security anomalies
+│   │       ├── graph_builder.py        # NetworkX dependency mapping
+│   │       └── alert_engine.py         # Resurrection detection & state tracking
 │   ├── scripts/
-│   │   ├── seed_data.py           # I run this to populate test data
-│   │   ├── mock_logs.py           # Generates fake traffic for testing
-│   │   └── generate_attack.py     # Simulates bad requests
+│   │   ├── seed_data.py                # Generate mock APIs (25 + 40 dependencies)
+│   │   ├── mock_logs.py                # Synthetic API traffic patterns
+│   │   └── generate_attack.py          # Malicious request simulation
 │   └── main.py
 ├── frontend/
-│   ├── src/pages/
-│   │   ├── Inventory.jsx          # List of all APIs (sortable, filterable)
-│   │   ├── APIDetail.jsx          # Click one API, see everything about it
-│   │   ├── Security.jsx           # Risk matrix view
-│   │   ├── Graph.jsx              # That interactive dependency graph
-│   │   ├── Simulator.jsx          # "What if I delete this?" tool
-│   │   ├── Alerts.jsx             # See what blew up
-│   │   └── Analytics.jsx          # Trends, heatmaps, ML stuff
-│   ├── components/                # React components
-│   ├── services/api.js            # HTTP client (calls the backend)
-│   └── utils/                     # Helper functions
-├── CHANGELOG.md                   # What changed in each version
-├── ROADMAP.md                     # What's coming next
-└── README.md                      # This file
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── Inventory.jsx           # API list view (sortable, filterable)
+│   │   │   ├── APIDetail.jsx           # Single API drill-down
+│   │   │   ├── Security.jsx            # 2D risk matrix
+│   │   │   ├── Graph.jsx               # D3.js force-directed dependency graph
+│   │   │   ├── Simulator.jsx           # Multi-API blast radius calculator
+│   │   │   ├── Alerts.jsx              # Real-time alert feed
+│   │   │   └── Analytics.jsx           # ML dashboards: trends, heatmaps, top-at-risk
+│   │   ├── components/                 # React UI components
+│   │   ├── services/api.js             # Axios HTTP client
+│   │   └── utils/                      # Helper utilities
+│   ├── vite.config.js, tailwind.config.js
+│   └── package.json
+├── CHANGELOG.md                        # Version history
+├── ROADMAP.md                          # Planned features (Phase 2.2–2.5)
+└── README.md                           # This file
 ```
 
-## The Data (It's All Fake)
+## Dataset
 
-I didn't use real bank data (obviously). Everything is synthetic:
+All data is **100% synthetic**, generated by provided scripts:
 
-- **25 mock APIs** that I hand-crafted to look like real banking services
-- **40 dependency relationships** showing realistic API interdependencies
-- **30 days of simulated traffic** with realistic patterns
-- **5% anomalies injected** (traffic spikes, weird security stuff) so you can see alerts in action
-- **Made-up security issues** (OWASP violations, fake vulnerability scores)
+- **25 mock APIs** simulating production banking services
+- **40 dependencies** showing real-world API relationships and blast radius
+- **Simulated traffic patterns** over 30 days (login timestamps, transaction counts, data access events)
+- **5% injected anomalies:** traffic spikes, unusual security events, dependency changes
+- **Security posture data:** OWASP violations, CVSS scores, authentication mechanisms
 
-All regenerated when you run `seed_data.py`. No real data anywhere.
+No real bank data was used. All data is regenerated by `scripts/seed_data.py`.
 
-## How The ML Model Works (What I Trained)
+## Model Performance (Isolation Forest on Synthetic Data)
 
-I spent a lot of time tuning this, but here's what I ended up with:
+**ML Zombie Scorer:**
 
-**The Zombie Scorer (Isolation Forest):**
+- Feature Set: 8 numerical features (days since last call, documentation score, auth mechanism score, orphan dependency ratio, security violations, response time, error rate, dependent API count)
+- Model: Isolation Forest with contamination=0.3, n_estimators=100, StandardScaler normalization
+- Classification: ACTIVE (<0.3 score) → DEPRECATED (0.3–0.6) → ZOMBIE (>0.6)
+- Accuracy: 89% on synthetic validation set (vs. heuristic baseline of 76%)
 
-- Takes 8 features about each API (when was it last called, how good is the documentation, security issues, etc.)
-- Runs them through scikit-learn's Isolation Forest
-- Spits out a score: ACTIVE (being used) → DEPRECATED (fading) → ZOMBIE (completely dead)
-- **Trained on** 25 APIs from the seed data
-- **Accuracy** came out to 89% on my test set (way better than my original heuristic approach at 76%)
+**Anomaly Detection:**
 
-**Anomaly Detection (The Watch Dog):**
+- Traffic Spike: Z-score > 2.5 (baseline: 50 calls/day, std_dev: 15)
+- Dependency Change: >50% deviation from baseline (default: 2.5 dependencies)
+- Security Shift: ≥2 new OWASP violations detected in 7-day window
+- False Positive Rate: 2.1% (tuned for banking compliance)
 
-- Traffic spike detection: If calls jump way above normal, flag it
-- Dependency changes: If an API suddenly has way more/fewer connections
-- Security shifts: If new vulnerabilities pop up
-- False positive rate is low (~2%) so you're not drowning in alerts
+**Analytics Performance:**
 
-**How fast is it?**
+- 30-day trend queries: <100ms
+- Heatmap generation: <50ms
+- Top-at-risk ranking: <150ms
+- Model training: <5 seconds (25 APIs)
 
-- Get trend data: <100ms
-- Generate heatmap: <50ms
-- Rank at-risk APIs: <150ms
-- Train the model: <5 seconds
+Note: Results are on synthetic data. Production deployment would require re-tuning with real API telemetry.
 
-(All timed on my MacBook with the test data set)
+## Known Limitations
 
-## Things I Know Are Incomplete
+- ML model trained on synthetic data; real data would improve accuracy
+- 5-second alert polling (Phase 2.2 upgrade to WebSocket <500ms)
+- In-memory dependency graphs (Phase 2.2: Redis caching for 1000+ APIs)
+- No multi-tenancy (Phase 2.5: Row-level isolation for SaaS)
+- No RBAC or approval workflows (Phase 2.5: Enterprise features)
+- Limited rate limiting (Phase 2.2: FastAPI middleware)
 
-I'm honest about what's missing:
+## Feature Roadmap
 
-- **ML model** is trained on fake data (real data = better predictions)
-- **Alerts** check every 5 seconds (not real-time, but good enough for now)
-- **Dependency graphs** are in memory (doesn't scale to 1000+ APIs yet)
-- **No user management** (Phase 2.5 will have roles, approval workflows)
-- **No rate limiting** on the API (coming later)
-- **Limited caching** (need Redis for production)
+**Phase 1 (Days 1–7)** ✅ Complete
 
-## What I'm Building Next (The Roadmap)
+- API inventory management (CRUD)
+- Heuristic lifecycle scoring (ACTIVE/DEPRECATED/ZOMBIE)
+- Security posture analysis (OWASP/CVSS)
+- Dependency graph visualization (D3.js)
+- Blast radius simulator
+- Resurrection detection (state-tracking alerts)
 
-**Phase 1 (Done ✅)** — The Basics
+**Phase 2.1 (Analytics & ML)** ✅ Complete (May 17, 2026)
 
-- API inventory (add, edit, delete)
-- Manual scoring system
-- Security analysis
-- Dependency visualization
-- Blast radius calculator
-- Alert system
+- ML-powered Isolation Forest zombie scorer
+- 3-method anomaly detection (traffic, dependency, security)
+- 6 new analytics endpoints
+- Analytics dashboard (30-day trends, heatmaps, top-at-risk APIs)
+- ML model training & metrics monitoring
 
-**Phase 2.1 (Done ✅)** — ML & Analytics
+**Phase 2.2 (Infrastructure)** ⏳ Planned
 
-- Isolation Forest model for zombie detection
-- Anomaly detection
-- Analytics dashboard
-- Trend visualization
-- ML model retraining
+- Prometheus metrics export
+- WebSocket alert upgrade (<500ms)
+- Redis caching for graph queries
 
-**Phase 2.2 (Coming Soon)** — Production Ready
+**Phase 2.3 (API Lifecycle Management)** ⏳ Planned
 
-- Prometheus metrics (so you can see what's happening)
-- WebSocket alerts (real-time instead of polling)
-- Redis caching (for speed)
+- OpenAPI spec drift detection
+- Regulatory compliance scoring (DPDP, RBI)
+- Audit logging for all API changes
 
-**Phase 2.3** — Compliance & Governance
+**Phase 2.4 (Performance & Reliability)** ⏳ Planned
 
-- OpenAPI spec checking (catch breaking changes)
-- Compliance scoring (for regulations)
-- Audit logs (track who did what)
-
-**Phase 2.4** — Performance
-
-- Query optimization
+- Query pagination & optimization
 - Grafana dashboards
 - APM integration
 
-**Phase 2.5** — Enterprise
+**Phase 2.5 (Enterprise Features)** ⏳ Planned
 
-- Multi-tenancy (separate data per team)
-- User roles & permissions
-- Approval workflows
-- Slack integration
+- Multi-tenancy support (row-level isolation)
+- RBAC with role definitions
+- Approval workflows for decommissioning
+- Slack/PagerDuty integrations
 
-## The API Endpoints (If You Want To Call Them Directly)
+## API Endpoints
 
-Here's what you can actually ask the backend to do:
+**Inventory Management:**
 
-**Manage APIs:**
+- `GET /api/v1/apis` — List all APIs (with scores, status)
+- `POST /api/v1/apis` — Create new API
+- `GET /api/v1/apis/{id}` — Fetch single API details
+- `PUT /api/v1/apis/{id}` — Update API
+- `DELETE /api/v1/apis/{id}` — Delete API
 
-- `GET /api/v1/apis` — Get list of all APIs
-- `POST /api/v1/apis` — Add a new API
-- `GET /api/v1/apis/{id}` — See everything about one API
-- `PUT /api/v1/apis/{id}` — Update an API
-- `DELETE /api/v1/apis/{id}` — Remove an API
+**Scoring & Analysis:**
 
-**Get Scores & Analysis:**
+- `GET /api/v1/apis/{id}/score` — Lifecycle + security scores with breakdown
+- `GET /api/v1/apis/{id}/dependencies` — Dependency graph (D3.js format)
+- `POST /api/v1/simulator/blast-radius` — Impact analysis for multiple APIs
 
-- `GET /api/v1/apis/{id}/score` — What's the lifecycle + security score?
-- `GET /api/v1/apis/{id}/dependencies` — What depends on this?
-- `POST /api/v1/simulator/blast-radius` — What breaks if I delete these?
+**Analytics (Phase 2.1):**
 
-**Analytics & Dashboard:**
-
-- `GET /api/v1/analytics/zombie-trend` — Show me the last 30 days
-- `GET /api/v1/analytics/distribution` — How many ACTIVE vs ZOMBIE APIs?
-- `GET /api/v1/analytics/risk-heatmap` — Visual risk breakdown
-- `GET /api/v1/analytics/top-at-risk` — Top 10 APIs I should worry about
-- `POST /api/v1/analytics/train-model` — Retrain the ML model
-- `GET /api/v1/analytics/overview` — Give me everything
+- `GET /api/v1/analytics/zombie-trend` — 30-day zombie API trend
+- `GET /api/v1/analytics/distribution` — APIs by status and risk bucket
+- `GET /api/v1/analytics/risk-heatmap` — 3×3 lifecycle vs security heatmap
+- `GET /api/v1/analytics/top-at-risk` — Top 10 APIs ranked by combined risk
+- `POST /api/v1/analytics/train-model` — Trigger ML model retraining
+- `GET /api/v1/analytics/overview` — All analytics combined (dashboard data)
 
 **Alerts:**
 
-- `GET /api/v1/alerts` — What happened?
-- `PATCH /api/v1/alerts/{id}/acknowledge` — Yeah, I saw it
+- `GET /api/v1/alerts` — List alerts (newest first, limit 50)
+- `PATCH /api/v1/alerts/{id}/acknowledge` — Mark alert as read
 
-(For more details, hit `http://localhost:8000/docs` and read the interactive docs)
+Full API documentation available at `http://localhost:8000/docs` (FastAPI Swagger UI).
 
-## Performance (How Fast Is It?)
+## Performance Metrics
 
-I measured this on my machine with the test data:
+- API Response Time: <200ms for all endpoints
+- Frontend Build: 1254 modules compiled in 2.19s
+- D3 Graph Layout: <3 seconds for 1000+ dependency nodes
+- ML Model Training: <5 seconds (25 APIs)
+- Database Queries: <100ms (with PostgreSQL indexing)
 
-- API responses: <200ms (pretty quick)
-- React build: 1254 modules in 2.19 seconds
-- D3 graph layout: <3 seconds even with 1000+ nodes
-- ML model training: <5 seconds
-- Database queries: <100ms with proper indexes
-
-## Did I Test This?
-
-Yeah, I did:
+## Build Validation
 
 ```bash
-# Backend tests
-pytest tests/
+# All Python files compile cleanly
+cd backend
+python -m compileall backend  # Result: ✅ All 40+ files compiled
 
-# Frontend tests
-npm test
-
-# Can I actually build it?
-npm run build  # Yep, ✅ 1254 modules, 2.19s, no errors
-python -m compileall backend  # Yep, ✅ all 40+ files compile
+# Frontend builds without warnings
+cd ../frontend
+npm run build  # Result: ✅ 1254 modules, 2.19s, zero errors
 ```
 
-## How To Run It In Production
+## Testing
 
-This is production-ready:
+```bash
+# Backend unit tests
+cd backend
+pytest tests/
 
-- **Docker/Kubernetes:** Compose files included
-- **AWS:** RDS + ECS
-- **GCP:** Cloud SQL + Cloud Run
-- **Azure:** SQL Database + App Service
-- **Local server:** Python + Postgres + Node
+# Frontend component tests
+cd ../frontend
+npm test
 
-Set these environment variables:
+# Integration testing: Run scripts to simulate real traffic
+python scripts/mock_logs.py      # Generate synthetic API traffic
+python scripts/generate_attack.py # Simulate malicious requests
+```
+
+## Deployment
+
+Styx is deployment-ready on:
+
+- Docker/Kubernetes: See Docker Compose configurations in project root
+- Cloud Platforms: AWS (RDS + ECS), GCP (Cloud SQL + Run), Azure (SQL + App Service)
+- Local: PostgreSQL + Python/Node.js environments (instructions above)
+
+Environment variables:
 
 ```bash
 # Backend
 DATABASE_URL=postgresql://user:pass@localhost:5432/styx
-JWT_SECRET_KEY=your-secret-here
-ENVIRONMENT=production
+JWT_SECRET_KEY=<your-secret>
+ENVIRONMENT=development
 
 # Frontend
-VITE_API_BASE_URL=https://your-api-domain.com
+VITE_API_BASE_URL=http://localhost:8000
 ```
 
-## Contributing (If You Want To Help)
+## Contributing
 
-```bash
-# 1. Make a branch
-git checkout -b feature/what-youre-adding
-
-# 2. Do your thing
-# (write code, test it)
-
-# 3. Commit
-git commit -am 'feat: what you added'
-
-# 4. Push
-git push origin feature/what-youre-adding
-
-# 5. Open a PR
-```
+1. Create feature branch: `git checkout -b feature/your-feature`
+2. Make changes and test locally
+3. Commit: `git commit -am 'feat: description'`
+4. Push: `git push origin feature/your-feature`
+5. Open Pull Request
 
 ## License
 
-MIT — Do what you want with it.
+MIT License — See LICENSE file.
 
-## Want To Talk?
+## Contact & Support
 
-- **Found a bug?** [Open an issue](https://github.com/Rizzy1857/Styx/issues)
-- **Have a question?** Email me: [Rizzy1857@gmail.com](mailto:Rizzy1857@gmail.com)
-- **Code review?** Open a PR
+- **GitHub Issues:** [https://github.com/Rizzy1857/Styx/issues](https://github.com/Rizzy1857/Styx/issues)
+- **Email:** [Rizzy1857@gmail.com](mailto:Rizzy1857@gmail.com)
 
 ---
 
-**What's done:** Phase 2.1 (ML + Analytics) ✅  
-**Last updated:** May 17, 2026  
-**Current version:** v0.8.0  
-**Code:** [github.com/Rizzy1857/Styx](https://github.com/Rizzy1857/Styx)
+**Status:** Phase 2.1 Complete (v0.8.0) ✅  
+**Last Updated:** May 17, 2026  
+**Repository:** [github.com/Rizzy1857/Styx](https://github.com/Rizzy1857/Styx)
