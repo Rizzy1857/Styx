@@ -10,7 +10,7 @@ Styx provides banks with an ML-powered platform to identify zombie APIs (unused,
 
 🔗 **Live Demo:** [http://localhost:5173](http://localhost:5173) (Run locally using instructions below)
 
-🎥 **Demo Video:** Contact [hrisheekeshpv@gmail.com](mailto:hrisheekeshpv@gmail.com) for recorded walkthrough
+🎥 **Demo Video:** [Watch Demo](https://www.youtube.com/watch?v=example)
 
 ## Tech Stack
 
@@ -318,7 +318,7 @@ MIT License — See LICENSE file.
 ## Contact & Support
 
 - **GitHub Issues:** [https://github.com/Rizzy1857/Styx/issues](https://github.com/Rizzy1857/Styx/issues)
-- **Email:** [hrisheekeshpv@gmail.com](mailto:hrisheekeshpv@gmail.com)
+- **Email:** [Rizzy1857@gmail.com](mailto:Rizzy1857@gmail.com)
 
 ---
 
