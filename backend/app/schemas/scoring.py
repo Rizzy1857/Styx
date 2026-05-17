@@ -2,26 +2,27 @@
 Pydantic schemas for API responses.
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Dict, Any, List, Optional
+from datetime import datetime
+from uuid import UUID
 
 
 class APIResponse(BaseModel):
     """Basic API information."""
 
-    id: str
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
     endpoint: str
     method: str
     host: str
     current_status: str
     zombie_score: Optional[float] = None
-    last_traffic_seen: Optional[str] = None
+    last_traffic_seen: Optional[datetime] = None
     dormant_duration_days: Optional[int] = None
     owner: Optional[str] = None
     has_documentation: bool = False
-
-    class Config:
-        from_attributes = True
 
 
 class LifecycleScoreResponse(BaseModel):
