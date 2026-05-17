@@ -176,49 +176,38 @@ styx/
 
 ## Key Features
 
-### Day 1: Backend Foundation ✅
+### Phase 1 (Days 1–7) ✅
 
 - FastAPI with OpenAPI/Swagger documentation
 - PostgreSQL database with 5 core models
 - Alembic migrations for schema versioning
 - Seed scripts for demo data (25 APIs + 40 dependencies + synthetic traffic)
 
-### Day 2: Frontend Scaffold ✅
+### Phase 1 Continued (Days 2–7) ✅
 
-- React + Vite + Tailwind CSS setup
+- React + Vite + Tailwind CSS frontend
 - Sortable/filterable inventory table
-- Navigation between pages
+- 2D Security Matrix visualization
+- D3.js force-directed dependency graph
+- Blast radius simulator with impact analysis
+- Real-time alert feed with metadata viewer
+- Attack traffic generator (50 malicious requests with DB integration)
 
-### Day 3: Scoring Services ✅
+### Phase 2.1 (May 2026) ✅
 
-- **Lifecycle Scorer:** 4-factor weighted formula (traffic decay, documentation, auth weakness, dependency orphan)
-- **Security Analyzer:** OWASP API Top 10 mapping with CVSS scores
-- API classification: ACTIVE / DEPRECATED / ZOMBIE / SHADOW
+#### Analytics & ML Module
 
-### Day 4: Security Visualization ✅
+- Isolation Forest ML-based zombie scorer (8 features, trained model)
+- Anomaly detection (traffic spikes, dependency changes, security shifts)
+- Analytics dashboard:
+  - 30-day zombie trends with direction (increasing/decreasing/stable)
+  - API distribution by status (ACTIVE/DEPRECATED/ZOMBIE/SHADOW)
+  - Lifecycle vs Security risk heatmap (3x3 grid)
+  - Top 10 at-risk APIs with anomaly flags
+  - 6 new API endpoints for real-time analytics
+  - ML model training and metrics monitoring
 
-- 2D Security Matrix (Lifecycle Risk vs Security Risk)
-- Factor explanation cards with progress bars
-- OWASP finding cards with severity badges
-
-### Day 5: Dependency Graph ✅
-
-- NetworkX-based graph builder
-- Impact score calculation (0.6×traffic + 0.4×dependencies)
-- Blast radius simulator for multi-API scenarios
-
-### Day 6: Graph Visualization ✅
-
-- D3.js force-directed graph with pan/zoom
-- Interactive node selection and highlighting
-- Simulator UI with severity recommendations
-
-### Day 7: Real-Time Alerts ✅
-
-- **Alert Engine:** Resurrection, shadow discovery, security violation detection
-- **State Tracking:** Only fires on status transitions
-- **Attack Generator:** 50 malicious requests with TOR IPs and suspicious payloads
-- **Alerts UI:** Real-time polling with expandable metadata
+**Status:** Production-ready | All code compiles/builds cleanly
 
 ## API Endpoints
 

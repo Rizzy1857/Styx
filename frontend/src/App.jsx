@@ -6,6 +6,7 @@ import Security from './pages/Security'
 import Graph from './pages/Graph'
 import Simulator from './pages/Simulator'
 import Alerts from './pages/Alerts'
+import Analytics from './pages/Analytics'
 import './index.css'
 
 export default function App() {
@@ -31,6 +32,7 @@ export default function App() {
             <NavLink to="/graph" label="Dependencies" icon="🔗" open={sidebarOpen} />
             <NavLink to="/simulator" label="Simulator" icon="⚡" open={sidebarOpen} />
             <NavLink to="/alerts" label="Alerts" icon="🚨" open={sidebarOpen} />
+            <NavLink to="/analytics" label="Analytics" icon="📊" open={sidebarOpen} />
           </nav>
         </aside>
 
@@ -57,6 +59,7 @@ export default function App() {
               <Route path="/graph" element={<Graph />} />
               <Route path="/simulator" element={<Simulator />} />
               <Route path="/alerts" element={<Alerts />} />
+              <Route path="/analytics" element={<Analytics />} />
               <Route path="/" element={<Inventory />} />
             </Routes>
           </div>
