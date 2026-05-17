@@ -9,19 +9,19 @@ from datetime import datetime, timedelta
 from typing import List, Dict
 from collections import defaultdict
 
-from backend.app.core.database import get_db
-from backend.app.models.api import API
-from backend.app.models.dependency import Dependency
-from backend.app.models.security import APISecurityPosture
-from backend.app.schemas.analytics import (
+from app.core.database import get_db
+from app.models.api import API
+from app.models.dependency import Dependency
+from app.models.security import APISecurityPosture
+from app.schemas.analytics import (
     ZombieTrendResponse, APITrendPoint, APIDistributionResponse,
     APIDistributionBucket, RiskHeatmapResponse, RiskCell,
     TopAtRiskResponse, TopAtRiskAPI, MLModelMetrics,
     AnalyticsOverviewResponse
 )
-from backend.app.services.isolation_forest_scorer import get_scorer, train_model
-from backend.app.services.anomaly_detector import get_detector
-from backend.app.services.security_analyzer import SecurityAnalyzer
+from app.services.isolation_forest_scorer import get_scorer, train_model
+from app.services.anomaly_detector import get_detector
+from app.services.security_analyzer import SecurityAnalyzer
 
 router = APIRouter(prefix="/api/v1/analytics", tags=["analytics"])
 security_analyzer = SecurityAnalyzer()

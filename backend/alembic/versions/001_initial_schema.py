@@ -32,10 +32,20 @@ alert_type_enum = sa.Enum(
 def upgrade() -> None:
     bind = op.get_bind()
 
-    api_status_enum.create(bind, checkfirst=True)
-    traffic_source_type_enum.create(bind, checkfirst=True)
-    severity_level_enum.create(bind, checkfirst=True)
-    alert_type_enum.create(bind, checkfirst=True)
+    # Create enums manually, handling duplicates
+    enums = [
+        ("api_status_enum", "('ACTIVE', 'DEPRECATED', 'ZOMBIE', 'SHADOW')"),
+        ("traffic_source_type_enum", "('gateway', 'vpc_flow', 'load_balancer', 'openapi_spec')"),
+        ("severity_level_enum", "('CRITICAL', 'HIGH', 'MEDIUM', 'LOW')"),
+        ("alert_type_enum", "('ZOMBIE_RESURRECTION', 'SHADOW_DISCOVERED', 'SECURITY_VIOLATION')")
+    ]
+    
+    for enum_name, enum_values in enums:
+        try:
+            bind.execute(sa.text(f"CREATE TYPE {enum_name} AS ENUM {enum_values}"))
+        except Exception:
+            # Enum already exists, skip
+            pass
 
     op.create_table(
         "apis",
@@ -43,7 +53,7 @@ def upgrade() -> None:
         sa.Column("endpoint", sa.String(length=255), nullable=False),
         sa.Column("method", sa.String(length=10), nullable=False),
         sa.Column("host", sa.String(length=255), nullable=False),
-        sa.Column("current_status", api_status_enum, nullable=False),
+        sa.Column("current_status", sa.String(20), nullable=False),
         sa.Column("previous_status", sa.String(length=20), nullable=True),
         sa.Column("status_changed_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("zombie_score", sa.Float(), nullable=False, server_default="0"),
@@ -64,7 +74,7 @@ def upgrade() -> None:
         sa.Column("api_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("owasp_category", sa.String(length=100), nullable=False),
         sa.Column("cvss_score", sa.Float(), nullable=False),
-        sa.Column("severity", severity_level_enum, nullable=False),
+        sa.Column("severity", sa.String(20), nullable=False),
         sa.Column("has_authentication", sa.Boolean(), nullable=False, server_default=sa.text("true")),
         sa.Column("uses_https", sa.Boolean(), nullable=False, server_default=sa.text("true")),
         sa.Column("tls_version", sa.String(length=10), nullable=True),
@@ -81,7 +91,7 @@ def upgrade() -> None:
         "traffic_sources",
         sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("api_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("source_type", traffic_source_type_enum, nullable=False),
+        sa.Column("source_type", sa.String(20), nullable=False),
         sa.Column("discovered_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.ForeignKeyConstraint(["api_id"], ["apis.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
@@ -106,7 +116,7 @@ def upgrade() -> None:
         "alerts",
         sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("api_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("alert_type", alert_type_enum, nullable=False),
+        sa.Column("alert_type", sa.String(30), nullable=False),
         sa.Column("trigger_metadata", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.Column("previous_dormant_days", sa.Integer(), nullable=True),
         sa.Column("severity", sa.String(length=20), nullable=False),

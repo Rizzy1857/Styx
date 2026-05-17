@@ -8,9 +8,9 @@ from typing import Dict, List, Tuple
 from sqlalchemy.orm import Session
 import statistics
 
-from backend.app.models.api import API
-from backend.app.models.dependency import Dependency
-from backend.app.models.security import APISecurityPosture
+from app.models.api import API
+from app.models.dependency import Dependency
+from app.models.security import APISecurityPosture
 
 
 class AnomalyDetector:

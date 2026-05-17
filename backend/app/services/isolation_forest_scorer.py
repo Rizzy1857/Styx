@@ -10,9 +10,9 @@ from sqlalchemy.orm import Session
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 
-from backend.app.models.api import API
-from backend.app.models.dependency import Dependency
-from backend.app.models.security import APISecurityPosture
+from app.models.api import API
+from app.models.dependency import Dependency
+from app.models.security import APISecurityPosture
 
 
 class IsolationForestScorer:
