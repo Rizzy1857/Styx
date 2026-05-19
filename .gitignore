@@ -40,6 +40,7 @@ backend/data/
 backend/logs/
 backend/*.db
 backend/alembic.ini.local
+backend/scripts/
 
 # Database
 *.db
