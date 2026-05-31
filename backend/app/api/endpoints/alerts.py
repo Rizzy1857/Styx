@@ -13,11 +13,13 @@ from datetime import datetime
 router = APIRouter(prefix="/api/v1", tags=["alerts"])
 
 
+from uuid import UUID
+
 class AlertResponse(BaseModel):
     """Alert response model."""
 
-    id: str
-    api_id: str
+    id: UUID
+    api_id: UUID
     alert_type: str
     severity: str
     trigger_metadata: dict

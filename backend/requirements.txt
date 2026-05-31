@@ -8,3 +8,5 @@ pydantic-settings>=2.1.0
 networkx==3.2.1
 faker==20.1.0
 python-dotenv==1.0.0
+numpy
+scikit-learn
