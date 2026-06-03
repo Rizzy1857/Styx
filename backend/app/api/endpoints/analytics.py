@@ -102,15 +102,16 @@ def get_api_distribution(db: Session = Depends(get_db)) -> APIDistributionRespon
     security_risks = []
 
     for api in apis:
-        by_status[api.status] += 1
+        by_status[api.current_status] += 1
 
         # Get lifecycle risk
         score, _ = scorer.calculate_zombie_score(api, db)
         lifecycle_risks.append(score)
 
         # Get security risk
-        findings = security_analyzer.analyze_security(api, db).findings
-        max_cvss = max([f.cvss_score for f in findings], default=0.0)
+        security_info = security_analyzer.analyze_security(api, db.query(APISecurityPosture).filter_by(api_id=api.id).first())
+        findings = security_info.get("findings", [])
+        max_cvss = max([f["cvss_score"] for f in findings], default=0.0)
         security_risks.append(max_cvss / 10.0)
 
     # Create lifecycle risk buckets
@@ -180,8 +181,9 @@ def get_risk_heatmap(db: Session = Depends(get_db)) -> RiskHeatmapResponse:
             lifecycle_bin = "67-100"
 
         # Get security risk
-        findings = security_analyzer.analyze_security(api, db).findings
-        max_cvss = max([f.cvss_score for f in findings], default=0.0)
+        security_info = security_analyzer.analyze_security(api, db.query(APISecurityPosture).filter_by(api_id=api.id).first())
+        findings = security_info.get("findings", [])
+        max_cvss = max([f["cvss_score"] for f in findings], default=0.0)
         security_percent = (max_cvss / 10.0) * 100
         if security_percent < 33:
             security_bin = "0-33"
@@ -220,8 +222,9 @@ def get_top_at_risk(limit: int = 10, db: Session = Depends(get_db)) -> TopAtRisk
         lifecycle_score, _ = scorer.calculate_zombie_score(api, db)
 
         # Get security risk
-        findings = security_analyzer.analyze_security(api, db).findings
-        max_cvss = max([f.cvss_score for f in findings], default=0.0)
+        security_info = security_analyzer.analyze_security(api, db.query(APISecurityPosture).filter_by(api_id=api.id).first())
+        findings = security_info.get("findings", [])
+        max_cvss = max([f["cvss_score"] for f in findings], default=0.0)
         security_score = max_cvss / 10.0
 
         # Get anomalies

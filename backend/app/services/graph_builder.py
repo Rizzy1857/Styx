@@ -30,13 +30,13 @@ class GraphBuilder:
         # Add all APIs as nodes
         apis = session.query(API).all()
         for api in apis:
-            graph.add_node(api.id, type="api", status=api.current_status)
+            graph.add_node(str(api.id), type="api", status=api.current_status)
 
         # Add service->API edges
         dependencies = session.query(Dependency).all()
         for dep in dependencies:
-            graph.add_node(dep.source_service, type="service")
-            graph.add_edge(dep.source_service, dep.target_api_id, weight=dep.call_frequency)
+            graph.add_node(str(dep.source_service), type="service")
+            graph.add_edge(str(dep.source_service), str(dep.target_api_id), weight=dep.call_frequency)
 
         return graph
 

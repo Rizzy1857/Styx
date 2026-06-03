@@ -37,7 +37,7 @@ class AnomalyDetector:
         window_start = now - timedelta(days=self.window_days)
 
         # Mock: get current traffic level (using status as proxy)
-        current_traffic = 100.0 if api.status == "ACTIVE" else 10.0
+        current_traffic = 100.0 if api.current_status == "ACTIVE" else 10.0
 
         # Get historical baseline (mock: average 50)
         baseline_traffic = 50.0
@@ -72,7 +72,7 @@ class AnomalyDetector:
             - metadata: change metrics
         """
         # Get current dependencies
-        current_deps = session.query(Dependency).filter_by(calling_api_id=api.id).count()
+        current_deps = session.query(Dependency).filter_by(target_api_id=api.id).count()
 
         # Get baseline (mock: average 2.5 dependencies per API)
         baseline_deps = 2.5
@@ -109,11 +109,11 @@ class AnomalyDetector:
         violations = 0
         if not security.has_authentication:
             violations += 1
-        if security.uses_http_only:
+        if not security.uses_https:
             violations += 1
         if not security.has_rate_limiting:
             violations += 1
-        if security.exposes_pii:
+        if security.exposes_sensitive_data:
             violations += 1
 
         # Baseline: expect 0-1 violations
@@ -129,9 +129,9 @@ class AnomalyDetector:
             "violations_change": deviation,
             "is_security_degraded": is_anomaly,
             "has_authentication": security.has_authentication,
-            "uses_http_only": security.uses_http_only,
+            "uses_https": security.uses_https,
             "has_rate_limiting": security.has_rate_limiting,
-            "exposes_pii": security.exposes_pii
+            "exposes_sensitive_data": security.exposes_sensitive_data
         }
 
         return is_anomaly, metadata

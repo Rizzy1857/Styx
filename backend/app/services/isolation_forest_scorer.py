@@ -4,7 +4,7 @@ Replaces heuristic scoring with ML model trained on historical API patterns.
 """
 
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Tuple
 from sqlalchemy.orm import Session
 from sklearn.ensemble import IsolationForest
@@ -49,21 +49,21 @@ class IsolationForestScorer:
         8. dependent_api_count: N (how many APIs depend on this one)
         """
         # Days since last call
-        now = datetime.utcnow()
-        last_call = api.last_called_at or api.created_at
+        now = datetime.now(timezone.utc)
+        last_call = api.last_traffic_seen or api.created_at
         days_since = max(0, (now - last_call).days)
         days_since_norm = min(days_since / 365.0, 1.0)  # Cap at 1 year
 
         # Documentation score (1 if OpenAPI spec present)
-        doc_score = 1.0 if api.openapi_spec else 0.0
+        doc_score = 1.0 if api.has_documentation else 0.0
 
         # Auth mechanism score (1 if auth present)
         security = session.query(APISecurityPosture).filter_by(api_id=api.id).first()
         auth_score = 1.0 if (security and security.has_authentication) else 0.0
 
         # Orphan dependency ratio
-        dependents = session.query(Dependency).filter_by(called_api_id=api.id).count()
-        total_deps = session.query(Dependency).filter_by(calling_api_id=api.id).count()
+        dependents = session.query(Dependency).filter_by(target_api_id=api.id).count()
+        total_deps = 0
         orphan_ratio = 0.0 if total_deps == 0 else 1.0 - (dependents / (total_deps + 1))
 
         # Security violations
@@ -71,19 +71,19 @@ class IsolationForestScorer:
         if security:
             if not security.has_authentication:
                 violations += 1
-            if security.uses_http_only:
+            if not security.uses_https:
                 violations += 1
             if not security.has_rate_limiting:
                 violations += 1
-            if security.exposes_pii:
+            if security.exposes_sensitive_data:
                 violations += 1
 
         # Response time (mock: use status as proxy)
-        response_time = 100.0 if api.status == "ACTIVE" else 500.0
+        response_time = 100.0 if api.current_status == "ACTIVE" else 500.0
         response_time_norm = min(response_time / 1000.0, 1.0)
 
         # Error rate (mock: 5% if DEPRECATED, 0.1% if ACTIVE)
-        error_rate = 5.0 if api.status == "DEPRECATED" else 0.1
+        error_rate = 5.0 if api.current_status == "DEPRECATED" else 0.1
 
         # Dependent API count
         dependent_count = dependents
@@ -168,23 +168,23 @@ class IsolationForestScorer:
         Fallback heuristic scoring (original Day 3.1 logic).
         Used when ML model not trained.
         """
-        now = datetime.utcnow()
-        last_call = api.last_called_at or api.created_at
+        now = datetime.now(timezone.utc)
+        last_call = api.last_traffic_seen or api.created_at
         days_since = (now - last_call).days
 
         # Traffic decay: 90%+ if >180 days
         traffic_decay = min(days_since / 180.0, 1.0)
 
         # Documentation: 0 if no spec
-        documentation = 0.0 if not api.openapi_spec else 1.0
+        documentation = 1.0 if api.has_documentation else 0.0
 
         # Auth weakness
         security = session.query(APISecurityPosture).filter_by(api_id=api.id).first()
         auth_weakness = 1.0 if (not security or not security.has_authentication) else 0.0
 
         # Orphan dependency
-        dependents = session.query(Dependency).filter_by(called_api_id=api.id).count()
-        total_deps = session.query(Dependency).filter_by(calling_api_id=api.id).count()
+        dependents = session.query(Dependency).filter_by(target_api_id=api.id).count()
+        total_deps = 0
         orphan = 1.0 if (total_deps > 0 and dependents == 0) else 0.0
 
         # Weighted formula
