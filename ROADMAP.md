@@ -1,7 +1,7 @@
 # Styx Development Roadmap
 
-**Current Status:** Phase 2.1 ✅ Complete (May 17, 2026)  
-**Overall Progress:** MVP (Phase 1) + Advanced Features (Phase 2.1)
+**Current Status:** Phase 1.5 ✅ Complete (June 25, 2026)  
+**Overall Progress:** MVP (Phase 1) + Live Ingestion Pivot (Phase 1.5) + Advanced Features (Phase 2.1)
 
 ---
 
@@ -152,6 +152,26 @@
 - Acknowledge button
 
 **Status:** Production-ready | Code Quality: Frontend builds <700KB gzipped
+
+---
+
+## Phase 1.5: Live Traffic Pivot ✅ COMPLETE (June 25, 2026)
+
+### Live Log Ingestion
+- Nginx Gateway setup with structured JSON logging
+- Background daemon (`log_ingestor.py`) tailing access logs to dynamically upsert APIs and dependencies
+- Robust crash-recovery mechanisms via byte offset tracking
+- OpenAPI specification (`openapi.json`) for ground-truth matching
+
+### Live Simulation
+- Mock FastAPI backend to inject programmable latency and error rates
+- Traffic generator script to simulate endless client load and rogue access attempts
+
+### Real-time Frontend
+- Upgraded polling to Server-Sent Events (SSE) for instant alert delivery
+- TTL caching on analytics endpoints to protect database performance during live ingestion
+
+**Status:** Production-ready for demo environments
 
 ---
 
@@ -309,9 +329,9 @@
 - ✅ All Python files compile
 - ✅ Frontend builds <150KB
 
-### Phase 2.2–2.5 (Planned)
+### Phase 2.2–2.5 (Enterprise Transition)
 
-- ⏳ eBPF agents deployed to 100+ pods
+- ⏳ Pivot from Nginx Log Tailing to eBPF kernel agents for true zero-instrumentation capture
 - ⏳ 10K+ APIs supportable
 - ⏳ WebSocket alerts <500ms latency
 - ⏳ Compliance dashboards live
@@ -331,6 +351,6 @@
 
 ---
 
-**Last Updated:** May 17, 2026  
-**Roadmap Version:** 1.0.0  
-**Next Review:** June 30, 2026
+**Last Updated:** June 25, 2026  
+**Roadmap Version:** 1.1.0  
+**Next Review:** July 30, 2026

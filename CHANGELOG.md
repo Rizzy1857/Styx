@@ -7,6 +7,25 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-06-25
+
+### Added (Phase 1.5: Live Traffic Pivot)
+
+- `docker-compose.yml` — Added Nginx reverse proxy and mock FastAPI services to simulate a live environment.
+- `nginx/nginx.conf` — Custom structured JSON log format emitting timestamps, latency, headers, and paths.
+- `backend/scripts/log_ingestor.py` — Background daemon to tail Nginx `access.log` and upsert APIs/Dependencies directly into Postgres. Replaces static seed data. Features robust offset tracking for crash recovery.
+- `backend/scripts/traffic_loop.py` — Infinitely generates synthetic HTTP load against the Nginx gateway, including rogue endpoints.
+- `backend/scripts/mock_services.py` — Mock FastAPI services to inject latency and error rates for the ingestor to track.
+- `backend/openapi.json` — Official allowlist used by the ingestor to detect Shadow APIs.
+- `backend/app/api/endpoints/alerts.py` — Added Server-Sent Events (SSE) `/alerts/stream` endpoint for true real-time UI updates.
+- `backend/app/api/endpoints/analytics.py` — Added a 10s TTL in-memory cache to prevent DB lockups during load.
+- `frontend/src/App.jsx` — Added a pulsing "Live Traffic" indicator to the top bar.
+
+### Changed
+- `backend/app/models/api.py` — Added `average_response_time_ms` and `error_rate_percent` columns to support live metrics.
+- `backend/app/services/isolation_forest_scorer.py` — Shifted from using mocked metrics to real metrics pulled directly from the DB.
+- `frontend/src/pages/Alerts.jsx` — Replaced `setInterval` polling with `EventSource` (SSE).
+
 ## [0.8.0] - 2026-05-17
 
 ### Added (Phase 2.1: Analytics & ML)

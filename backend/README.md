@@ -1,45 +1,54 @@
-# Styx Backend (Day 1)
+# Styx Backend
 
-This folder contains the Day 1 MVP foundation:
+This directory contains the FastAPI application, Postgres database models, and the live log ingestion pipeline.
 
-- SQLAlchemy models + Alembic migration
-- FastAPI skeleton with `/health`
-- Data seed and mock log generation scripts
+## Architecture (Hackathon Demo State)
 
-## Quick Start
+Styx currently operates using a **Gateway Log Tailing** architecture to simulate a live traffic environment for demonstration purposes:
+- **Nginx Reverse Proxy:** Fronts mock API services and logs all traffic as structured JSON.
+- **Log Ingestor (`scripts/log_ingestor.py`):** A daemon that tails the Nginx logs, calculates latency/error metrics, and upserts APIs into Postgres.
+- **Traffic Loop (`scripts/traffic_loop.py`):** Generates synthetic HTTP load against the Nginx gateway, including rogue/shadow API calls to trigger alerts.
+- **FastAPI Core:** Serves this data via REST and Server-Sent Events (SSE) to the frontend.
 
-1. Create and activate a virtual environment.
-1. Install dependencies:
+## Quick Start (Live Pipeline)
 
-```bash
-pip install -r requirements.txt
-```
+1. **Start the Infrastructure (Nginx, Mock Services, Postgres):**
+   ```bash
+   # From the project root
+   docker-compose up -d
+   ```
 
-1. Configure environment:
+2. **Setup Python Environment:**
+   ```bash
+   cd backend
+   python -m venv .venv
+   source .venv/bin/activate
+   pip install -r requirements.txt
+   ```
 
-```bash
-cp .env.example .env
-```
+3. **Run Database Migrations:**
+   ```bash
+   alembic upgrade head
+   ```
 
-1. Run migration:
+4. **Start the Live Pipeline (Requires 3 Terminals):**
 
-```bash
-alembic upgrade head
-```
+   **Terminal 1 (FastAPI Server):**
+   ```bash
+   source .venv/bin/activate
+   uvicorn app.main:app --reload --port 8000
+   ```
 
-1. Seed demo data and generate logs:
+   **Terminal 2 (Log Ingestor):**
+   ```bash
+   source .venv/bin/activate
+   python scripts/log_ingestor.py
+   ```
 
-```bash
-python scripts/seed_data.py
-python scripts/mock_logs.py
-```
+   **Terminal 3 (Traffic Generator):**
+   ```bash
+   source .venv/bin/activate
+   python scripts/traffic_loop.py
+   ```
 
-1. Start API server:
-
-```bash
-uvicorn main:app --reload
-```
-
-## Endpoints
-
-- `GET /health`
+The backend API will now be running on `http://localhost:8000`, continuously processing simulated live traffic from Nginx.
