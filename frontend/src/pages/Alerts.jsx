@@ -8,6 +8,7 @@ export default function Alerts() {
   const [alerts, setAlerts] = useState([])
 
   useEffect(() => {
+    // Initial fetch
     const fetchAlerts = async () => {
       try {
         const response = await getAlerts()
@@ -22,9 +23,33 @@ export default function Alerts() {
 
     fetchAlerts()
 
-    // Poll every 5 seconds
-    const interval = setInterval(fetchAlerts, 5000)
-    return () => clearInterval(interval)
+    // Connect to SSE stream
+    const eventSource = new EventSource('http://localhost:8000/api/v1/alerts/stream')
+    
+    eventSource.addEventListener('new_alerts', (e) => {
+      try {
+        const newAlerts = JSON.parse(e.data)
+        if (newAlerts && newAlerts.length > 0) {
+          setAlerts((prev) => {
+            // Prepend new alerts and filter out duplicates
+            const existingIds = new Set(prev.map(a => a.id))
+            const uniqueNew = newAlerts.filter(a => !existingIds.has(a.id))
+            return [...uniqueNew, ...prev]
+          })
+        }
+      } catch (err) {
+        console.error('Error parsing SSE data', err)
+      }
+    })
+
+    eventSource.onerror = (err) => {
+      console.error('SSE Error', err)
+      // The browser will automatically try to reconnect
+    }
+
+    return () => {
+      eventSource.close()
+    }
   }, [])
 
   const handleAcknowledge = async (alertId) => {

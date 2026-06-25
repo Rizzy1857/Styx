@@ -1,0 +1,22 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Styx Allowed APIs",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/payment": {
+      "get": {},
+      "post": {}
+    },
+    "/api/v1/user/profile": {
+      "get": {}
+    },
+    "/api/v1/auth/login": {
+      "post": {}
+    },
+    "/api/v1/limits": {
+      "get": {}
+    }
+  }
+}

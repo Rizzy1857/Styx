@@ -3,17 +3,18 @@ GET /api/v1/alerts - List all alerts
 PATCH /api/v1/alerts/{id}/acknowledge - Acknowledge an alert
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from app.core.database import get_db
 from app.models import Alert
 from datetime import datetime
+import asyncio
+from sse_starlette.sse import EventSourceResponse
+from uuid import UUID
+import json
 
 router = APIRouter(prefix="/api/v1", tags=["alerts"])
-
-
-from uuid import UUID
 
 class AlertResponse(BaseModel):
     """Alert response model."""
@@ -56,3 +57,30 @@ def acknowledge_alert(alert_id: str, db: Session = Depends(get_db)):
     alert.acknowledged = True
     db.commit()
     return alert
+
+@router.get("/alerts/stream")
+async def stream_alerts(request: Request, db: Session = Depends(get_db)):
+    """SSE endpoint for real-time alerts."""
+    async def event_generator():
+        last_check = datetime.utcnow()
+        while True:
+            if await request.is_disconnected():
+                break
+                
+            # Query for new alerts since last check
+            new_alerts = db.query(Alert).filter(Alert.created_at > last_check).order_by(Alert.created_at.asc()).all()
+            
+            if new_alerts:
+                last_check = new_alerts[-1].created_at
+                alerts_data = [
+                    AlertResponse.model_validate(a).model_dump(mode="json")
+                    for a in new_alerts
+                ]
+                yield {
+                    "event": "new_alerts",
+                    "data": json.dumps(alerts_data)
+                }
+            
+            await asyncio.sleep(1)
+
+    return EventSourceResponse(event_generator())

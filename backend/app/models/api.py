@@ -40,6 +40,8 @@ class API(Base):
     dormant_duration_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     has_documentation: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     owner: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    average_response_time_ms: Mapped[float] = mapped_column(Float, nullable=False, default=100.0)
+    error_rate_percent: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()

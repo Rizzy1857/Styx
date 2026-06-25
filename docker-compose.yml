@@ -17,5 +17,25 @@ services:
       timeout: 5s
       retries: 5
 
+  mock-services:
+    image: python:3.11-slim
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    command: >
+      bash -c "pip install fastapi uvicorn[standard] && python scripts/mock_services.py"
+    ports:
+      - "8001:8001"
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - mock-services
+
 volumes:
   postgres_data:

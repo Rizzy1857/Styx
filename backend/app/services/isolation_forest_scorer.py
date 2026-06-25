@@ -78,12 +78,12 @@ class IsolationForestScorer:
             if security.exposes_sensitive_data:
                 violations += 1
 
-        # Response time (mock: use status as proxy)
-        response_time = 100.0 if api.current_status == "ACTIVE" else 500.0
+        # Response time
+        response_time = api.average_response_time_ms
         response_time_norm = min(response_time / 1000.0, 1.0)
 
-        # Error rate (mock: 5% if DEPRECATED, 0.1% if ACTIVE)
-        error_rate = 5.0 if api.current_status == "DEPRECATED" else 0.1
+        # Error rate
+        error_rate = api.error_rate_percent
 
         # Dependent API count
         dependent_count = dependents

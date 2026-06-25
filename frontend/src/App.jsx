@@ -40,14 +40,19 @@ export default function App() {
         <main className="flex-1 overflow-auto">
           {/* Top Bar */}
           <div className="bg-light-navy border-b border-ice-blue/20 px-6 py-4 flex items-center justify-between">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="text-ice-blue hover:text-ice-blue/80 transition"
-            >
-              ☰
-            </button>
-            <h2 className="text-lg font-semibold text-ice-blue">API Lifecycle Intelligence</h2>
-            <div className="w-8" />
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="text-ice-blue hover:text-ice-blue/80 transition"
+              >
+                ☰
+              </button>
+              <h2 className="text-lg font-semibold text-ice-blue">API Lifecycle Intelligence</h2>
+            </div>
+            <div className="flex items-center space-x-2 bg-navy px-3 py-1 rounded-full border border-ice-blue/20">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+              <span className="text-xs font-medium text-ice-blue uppercase tracking-wider">Live Traffic</span>
+            </div>
           </div>
 
           {/* Page Content */}

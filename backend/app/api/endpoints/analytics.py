@@ -22,9 +22,21 @@ from app.schemas.analytics import (
 from app.services.isolation_forest_scorer import get_scorer, train_model
 from app.services.anomaly_detector import get_detector
 from app.services.security_analyzer import SecurityAnalyzer
+import time
 
 router = APIRouter(prefix="/api/v1/analytics", tags=["analytics"])
 security_analyzer = SecurityAnalyzer()
+
+_cache = {}
+CACHE_TTL = 10
+
+def get_cached(key):
+    if key in _cache and time.time() - _cache[key]["time"] < CACHE_TTL:
+        return _cache[key]["data"]
+    return None
+
+def set_cached(key, data):
+    _cache[key] = {"time": time.time(), "data": data}
 
 
 @router.get("/zombie-trend", response_model=ZombieTrendResponse)
@@ -33,6 +45,10 @@ def get_zombie_trend(db: Session = Depends(get_db)) -> ZombieTrendResponse:
     Get zombie API trends over last 30 days.
     Mock data: generates daily counts based on seed data variations.
     """
+    cached = get_cached("zombie_trend")
+    if cached:
+        return cached
+
     # Get all APIs and score them
     apis = db.query(API).all()
     scorer = get_scorer()
@@ -80,20 +96,22 @@ def get_zombie_trend(db: Session = Depends(get_db)) -> ZombieTrendResponse:
         trend_direction = "increasing"
     elif last_zombies < first_zombies * 0.9:
         trend_direction = "decreasing"
-    else:
-        trend_direction = "stable"
-
-    return ZombieTrendResponse(
+    res = ZombieTrendResponse(
         trend_data=trend_data,
         current_zombie_count=zombie_count,
         zombie_percentage=zombie_percent,
         trend_direction=trend_direction
     )
-
+    set_cached("zombie_trend", res)
+    return res
 
 @router.get("/distribution", response_model=APIDistributionResponse)
 def get_api_distribution(db: Session = Depends(get_db)) -> APIDistributionResponse:
     """Get API distribution by status and risk levels."""
+    cached = get_cached("distribution")
+    if cached:
+        return cached
+
     apis = db.query(API).all()
     scorer = get_scorer()
 
@@ -146,20 +164,22 @@ def get_api_distribution(db: Session = Depends(get_db)) -> APIDistributionRespon
             security_buckets[3].count += 1
 
     total = len(apis)
-    for bucket in lifecycle_buckets + security_buckets:
-        bucket.percentage = (bucket.count / total * 100) if total > 0 else 0
-
-    return APIDistributionResponse(
+    res = APIDistributionResponse(
         by_status=by_status,
         by_lifecycle_risk=lifecycle_buckets,
         by_security_risk=security_buckets,
         total_apis=total
     )
-
+    set_cached("distribution", res)
+    return res
 
 @router.get("/risk-heatmap", response_model=RiskHeatmapResponse)
 def get_risk_heatmap(db: Session = Depends(get_db)) -> RiskHeatmapResponse:
     """Get 2D heatmap of APIs by lifecycle vs security risk."""
+    cached = get_cached("risk_heatmap")
+    if cached:
+        return cached
+
     apis = db.query(API).all()
     scorer = get_scorer()
 
@@ -199,19 +219,21 @@ def get_risk_heatmap(db: Session = Depends(get_db)) -> RiskHeatmapResponse:
         RiskCell(lifecycle_bin=k[0], security_bin=k[1], api_count=v)
         for k, v in heatmap_dict.items()
     ]
-    max_count = max([cell.api_count for cell in heatmap], default=1)
-    min_count = min([cell.api_count for cell in heatmap], default=0)
-
-    return RiskHeatmapResponse(
+    res = RiskHeatmapResponse(
         heatmap=heatmap,
         max_count=max_count,
         min_count=min_count
     )
-
+    set_cached("risk_heatmap", res)
+    return res
 
 @router.get("/top-at-risk", response_model=TopAtRiskResponse)
 def get_top_at_risk(limit: int = 10, db: Session = Depends(get_db)) -> TopAtRiskResponse:
     """Get top N APIs by combined risk score."""
+    cached = get_cached(f"top_at_risk_{limit}")
+    if cached:
+        return cached
+
     apis = db.query(API).all()
     scorer = get_scorer()
     detector = get_detector()
@@ -250,11 +272,13 @@ def get_top_at_risk(limit: int = 10, db: Session = Depends(get_db)) -> TopAtRisk
     # Count critical (combined_risk > 0.7)
     critical_count = sum(1 for api in api_risks if api.combined_risk > 0.7)
 
-    return TopAtRiskResponse(
+    res = TopAtRiskResponse(
         top_apis=api_risks[:limit],
         total_at_risk=len(api_risks),
         critical_count=critical_count
     )
+    set_cached(f"top_at_risk_{limit}", res)
+    return res
 
 
 @router.post("/train-model")
