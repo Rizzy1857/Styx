@@ -4,7 +4,7 @@
 
 This project addresses a critical banking operations challenge: **Safely decommissioning risky APIs without breaking dependent systems.**
 
-Styx is a hackathon prototype that enables organizations to identify zombie APIs (unused, outdated, or deprecated), understand blast radius through dependency mapping, and detect anomalies in real-time. The platform combines machine learning (Isolation Forest) trained on live traffic metrics, security posture analysis, and interactive visualizations. In its current form, it uses **Nginx log tailing** to simulate the telemetry collection of a true eBPF-based enterprise tool.
+Styx is a hackathon prototype that enables organizations to identify zombie APIs (unused, outdated, or deprecated), understand blast radius through dependency mapping, and detect anomalies in real-time. The platform combines machine learning (Isolation Forest) using features derived from live telemetry metrics, security posture analysis, and interactive visualizations. In its current form, it uses **Nginx log tailing** to simulate the telemetry collection of a true eBPF-based enterprise tool.
 
 ## Live Demo
 
@@ -134,7 +134,7 @@ There is no static seed data strictly required; the database populates itself ba
 - Feature Set: 8 numerical features (days since last call, documentation score, auth mechanism score, orphan dependency ratio, security violations, response time, error rate, dependent API count)
 - Model: Isolation Forest with contamination=0.3, n_estimators=100, StandardScaler normalization
 - Classification: ACTIVE (<0.3 score) → DEPRECATED (0.3–0.6) → ZOMBIE (>0.6)
-- Accuracy: 89% on synthetic validation set (vs. heuristic baseline of 76%)
+- Validation was performed on synthetic datasets generated for the hackathon environment.
 
 **Anomaly Detection:**
 
@@ -148,7 +148,7 @@ There is no static seed data strictly required; the database populates itself ba
 - 30-day trend queries: <100ms
 - Heatmap generation: <50ms
 - Top-at-risk ranking: <150ms
-- Model training: <5 seconds (25 APIs)
+- Model training: <5 seconds (initial telemetry sample)
 
 Note: Results rely on simulated mock traffic. A true production deployment would require re-tuning the model with organic API telemetry.
 
@@ -183,7 +183,7 @@ Note: Results rely on simulated mock traffic. A true production deployment would
 
 **Phase 2.2 (Infrastructure)** ⏳ Planned
 
-- ⏳ Pivot from Nginx Log Tailing to eBPF kernel agents for true enterprise telemetry
+- ⏳ Augment gateway telemetry with eBPF kernel agents for East-West traffic visibility
 - ⏳ 10K+ APIs supportable
 - ⏳ Compliance dashboards live
 - ⏳ RBAC enforced across platform
@@ -245,7 +245,7 @@ Full API documentation available at `http://localhost:8000/docs` (FastAPI Swagge
 - API Response Time: <200ms for all endpoints
 - Frontend Build: 1254 modules compiled in 2.19s
 - D3 Graph Layout: <3 seconds for 1000+ dependency nodes
-- ML Model Training: <5 seconds (25 APIs)
+- ML Model Training: <5 seconds (initial telemetry sample)
 - Database Queries: <100ms (with PostgreSQL indexing)
 
 ## Build Validation

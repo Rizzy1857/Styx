@@ -322,7 +322,7 @@
 
 ### Phase 2.1 (Complete)
 
-- ✅ ML model accuracy 89% on zombie detection
+- ✅ ML model demonstrates the feasibility of telemetry-driven risk scoring.
 - ✅ Anomaly detection 3 methods with <2% false positive rate
 - ✅ 6 new analytics endpoints
 - ✅ Analytics dashboard with 6 sections
@@ -331,7 +331,7 @@
 
 ### Phase 2.2–2.5 (Enterprise Transition)
 
-- ⏳ Pivot from Nginx Log Tailing to eBPF kernel agents for true zero-instrumentation capture
+- ⏳ Augment gateway telemetry with eBPF kernel agents for East-West traffic visibility
 - ⏳ 10K+ APIs supportable
 - ⏳ WebSocket alerts <500ms latency
 - ⏳ Compliance dashboards live
